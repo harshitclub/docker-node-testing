@@ -8,9 +8,10 @@ WORKDIR /docker-node-testing
 COPY . .
 
 RUN npm install
+RUN npm run build
 
 # Expose port 7000
-EXPOSE 7000
+EXPOSE 3000
 
 # Start the Node.js server
-CMD ["node", "index.js"]
+CMD ["npm", "start"]

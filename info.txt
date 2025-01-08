@@ -1,0 +1,46 @@
+#### Development Environment ####
+
+cmd: docker build -t backend:dev -f docker/development/Dockerfile .
+cmd: docker run --name backend-dev -p 5000:5000 -v ${PWD}:/backend -v /backend/node+modules --env-file .env.development --detach --tty --interactive backend:dev
+cmd: docker stop backend-dev
+cmd: docker rm backend-dev
+
+cmd:: docker stop backend-dev && docker rm backend-dev
+# OR
+cmd:: docker rm -f backend-dev #Forcibly removes a running container
+
+cmd: docker ps
+cmd: docker ps -a
+cmd: docker rmi image-id
+
+info::>>
+
+:: --name: Using --name (e.g., backend-dev, backend-prod) gives your containers a descriptive name, making it easier to manage them (e.g., docker stop backend-dev).
+
+:: --detach tty and interactive: The combination of --detach, --tty, and --interactive is used in the development environment.
+
+   :: --detach runs the container in the background.
+   :: --tty allocates a pseudo-TTY, which allows you to interact with the container (e.g., see logs).
+   :: --interactive keeps STDIN open, allowing you to send input to the container.
+
+:: -v ${PWD}:/backend (Bind Mount): This mounts your current working directory (project root) into the /backend directory inside the container. This is crucial for development because it allows you to make changes to your code on the host machine and see those changes reflected immediately inside the container (hot reloading).
+
+:: -v /backend/node_modules (Named Volume): This mounts a named volume for the node_modules directory. This is a very important improvement. It prevents the node_modules inside the container from being overwritten by the host's node_modules (which can cause issues if the host and container have different Node.js versions or operating systems). This also significantly improves performance as node_modules changes are not synced between the host and container.
+
+:: --env-file .env.development: Loads environment variables from a .env.development file. This is best practice for managing environment-specific configurations.
+
+
+#### Production Environment ####
+
+cmd: docker build -t backend:prod -f docker/production/Dockerfile .
+cmd: docker run --name backend-prod -p 5000:5000 --env-file .env.production --detach --restart unless-stopped backend:prod
+
+info::>>
+:: --restart unless-stopped: This ensures that the container restarts automatically if it crashes or the server reboots, unless you manually stop the container. This is essential for production uptime.
+:: --env-file .env.production: Loads environment variables from a .env.production file. This is crucial for separating production secrets and configurations from development.
+:: Removed Bind Mount (-v ${PWD}:/backend): In production, you should not use a bind mount. You want the application code to be packaged inside the image, not mounted from the host. This makes your deployment more consistent and prevents issues caused by host file system changes.
+:: Removed named volume for node_modules: In production, node_modules should be installed inside the container during the build process.
+
+
+
+

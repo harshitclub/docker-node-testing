@@ -1,8 +1,9 @@
-const express = require("express");
+import { Request, Response } from "express";
+import express from "express";
 
 const app = express();
 
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
   res.json({ message: "hello world! \nDocker testing done!", status: 200 });
 });
 
